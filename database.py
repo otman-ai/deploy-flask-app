@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine , text
 
 host = "aws.connect.psdb.cloud"
-user = "0b6lfqrst79nbtyy4y3l"
-password = "pscale_pw_vc0Uq1jSdgv4UIJ9DSIND0g9iKBdPWL3xVp65NVek6A"
+user = "57nh0lnmkrho72pru6qe"
+password = "pscale_pw_to6kijCRtKPCXbkHxLDDTlxOHASG6YBVR6pzKo0T9Pt"
 database = "data-users"
 connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
 connect_args={
