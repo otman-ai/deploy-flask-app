@@ -13,8 +13,8 @@ from sqlalchemy import create_engine , text
 # engine = create_engine(connection_db,connect_args=connect_args)
 
 host = "aws.connect.psdb.cloud"
-user = "nljrirmxnsmw6u0ix81u"
-password = "pscale_pw_JylvFWxmkFQPK38mER6I2clQDvvSf2UETFzFleNaX4l"
+user = "2o7vv2sr9vpxz3vgl3fe"
+password = "pscale_pw_OaUmNu8hB0RSYfjz8Culjs8dUx9kgb0VPwAxN77lWx3"
 database = "data-users"
 connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
