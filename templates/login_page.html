@@ -16,7 +16,9 @@
       <div class="signin-signup">
         <form method="post" action="/login" class="sign-in-form" id="sign-in-form">
           <h2 class="title">Sign in</h2>
-    
+          {% if msg %}
+          <p>{{ msg }}</p>
+          {% enif %}
           <div class="input-field">
             <i class="fas fa-user"></i>
             <input type="text" placeholder="Username" name="username-sign-in" />

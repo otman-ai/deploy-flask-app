@@ -18,12 +18,9 @@ def forgot_password():
 def register():
     msg = ""
     if request.method == 'POST':
-        data = request.json
-        print(data)
-        username = data["username"]
-        password = data["password"]
-        email = data['email']
-        print(username, password, email)
+        username = request.form['username-sign-up']
+        password = request.form['password-sign-up']
+        email = request.form['email']
         check_query = f"select count(*) from users where username = '{username}' or email = '{email}'"
         query = f"insert into users(username, email, password_hash) values ('{username}', '{email}', '{password}')"
         
@@ -37,7 +34,7 @@ def register():
                     msg = "Successfully sign up!"
                 else:
                     msg = "Failed to sign up!"
-    return redirect(url_for('login')), msg
+    return render_template('login_page.html',msg=msg)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
