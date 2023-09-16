@@ -1,7 +1,7 @@
 # Import libraries
-from flask import Flask, render_template, redirect, url_for,request
+from flask import Flask, render_template, redirect, url_for,request,jsonify
 from sqlalchemy import create_engine , text
-from database import engine
+from database import engine, load_data
 app = Flask(__name__, template_folder="templates")
 
 @app.route("/")
@@ -16,29 +16,17 @@ def forgot_password():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    msg = ""
-    if request.method == 'POST':
-        username = request.form['username-sign-up']
-        password = request.form['password-sign-up']
-        email = request.form['email']
-        check_query = f"select count(*) from users where username = '{username}' or email = '{email}'"
-        query = f"insert into users(username, email, password_hash) values ('{username}', '{email}', '{password}')"
-        
-        with engine.connect() as connection:
-            result = connection.execute(text(check_query))
-            if result.all()[0][0]>=1:
-                msg = "The username is already exist!"
-            else:
-                result = connection.execute(text(query))
-                if result:
-                    msg = "Successfully sign up!"
-                else:
-                    msg = "Failed to sign up!"
-    return render_template('login_page.html',msg=msg)
+    return render_template('login_page.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     return render_template('login_page.html')
+
+
+@app.route('/api')
+def api():
+    data = load_data()
+    return jsonify(data)
 
 if __name__ == '__main__':    
     app.run(debug=True)
