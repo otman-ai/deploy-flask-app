@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- ======= Styles ====== -->
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+</head>
+
+<body>
+    <!-- =============== Navigation ================ -->
+    <div class="container">
+        <div class="navigation">
+            <ul>
+                <li >
+                    <a href="/">
+                        <p class="logo-">Secure<span style="color: white;">.AI</span></p>
+                    </a>
+                </li>
+                <li data-item-name="dash">
+                    <a href="/dash">
+                        <span class="icon">
+                            <ion-icon name="home-outline"></ion-icon>
+                        </span>
+                        <span class="title">Dashboard</span>
+                    </a>
+                </li>
+
+                <li data-item-name="/dash/cameras" id="cameras">
+                    <a href="/dash/cameras">
+                        <span class="icon">
+                            <ion-icon name="camera-outline"></ion-icon>
+                        </span>
+                        <span class="title">Cameras</span>
+                    </a>
+                </li>
+
+                <li data-item-name="/dash/security" id="settings">
+                    <a href="/dash/security">
+                        <span class="icon">
+                            <ion-icon name="shield-outline"></ion-icon>
+                        </span>
+                        <span class="title">Security</span>
+                    </a>
+                </li>
+                <li data-item-name="/dash/storage" id="storage">
+                    <a href="/dash/storage">
+                        <span class="icon">
+                            <ion-icon name="cloud-outline"></ion-icon>
+                        </span>
+                        <span class="title">Storage</span>
+                    </a>
+                </li>
+                <li data-item-name="/dash/users" id="users">
+                    <a href="/dash/users">
+                        <span class="icon">
+                            <ion-icon name="people-outline"></ion-icon>
+                        </span>
+                        <span class="title">Users</span>
+                    </a>
+                </li>
+
+                <li data-item-name="/dash/reports" id="reports">
+                    <a href="/dash/reports">
+                        <span class="icon">
+                            <ion-icon name="document-text-outline"></ion-icon>
+                        </span>
+                        <span class="title">Reports</span>
+                    </a>
+                </li>
+
+                <li data-item-name="/dash/support" id="support">
+                    <a href="/dash/support">
+                        <span class="icon">
+                            <ion-icon name="help-outline"></ion-icon>
+                        </span>
+                        <span class="title">Help & Support</span>
+                    </a>
+                </li>
+
+                <li data-item-name="/dash/settings" id="settings">
+                    <a href="/dash/settings">
+                        <span class="icon">
+                            <ion-icon name="settings-outline"></ion-icon>
+                        </span>
+                        <span class="title">Settings</span>
+                    </a>
+                </li>
+ 
+                <li data-item-name="/dash/account" id="account">
+                    <a href="/dash/account">
+                        <span class="icon">
+                            <ion-icon name="person-circle-outline"></ion-icon>
+                        </span>
+                        <span class="title">Account</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/logout" >
+                        <span class="icon">
+                            <ion-icon name="log-out-outline"></ion-icon>
+                        </span>
+                        <span class="title">Sign Out</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- ========================= Main ==================== -->
+        <div class="main" id="main">
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </div>
+
+                <div class="search">
+                    <label>
+                        <input type="text" placeholder="Search here">
+                        <ion-icon name="search-outline"></ion-icon>
+                    </label>
+                </div>
+
+                <div class="user">
+                    <img src="assets/imgs/customer01.jpg" alt="">
+                </div>
+            </div>
+  
+            <div class="content">
+                {% block content %}{% endblock %}
+            </div>
+                
+        </div>
+    </div>
+
+    <!-- =========== Scripts =========  -->
+    <script src="../static/scripts/dashboard.js"></script>
+
+    <!-- ====== ionicons ======= -->
+    <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>

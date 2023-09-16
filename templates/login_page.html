@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://kit.fontawesome.com/64d58efce2.js" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="../static/css/login_style.css">
+  <script src="{{ url_for('static', filename='css/login_style.css') }}"></script>
+  <script src="{{ url_for('static', filename='css/login_style.css') }}"></script>
 
   <title>SecureAI Home</title>
 </head>
@@ -16,23 +18,30 @@
       <div class="signin-signup">
         <form method="post" action="/login" class="sign-in-form" id="sign-in-form">
           <h2 class="title">Sign in</h2>
-          {% if msg %}
-          <p>{{ msg }}</p>
+          {% if message1 %}
+          <p id="infoIncorrect" style="color: red;font-size: 14px;">{{ message1 }}</p>
           {% endif %}
           <div class="input-field">
             <i class="fas fa-user"></i>
             <input type="text" placeholder="Username" name="username-sign-in" />
           </div>
+          <p id="username-error-sign-in" style="color: red; display: none;font-size: 14px; ">Invalid username</p>
+
           <div class="input-field">
 
             <i class="fas fa-lock"></i>
             <input type="password" placeholder="Password" name="password-sign-in" id="password-input" />
             <button type="button" id="show-password-button" class="show-password-button">Show Password</button>
           </div> 
+          <p id="password-error-signIn" style="color: red; display: none;font-size: 14px;" name="password-error-signIn">
+            Invalid password.</p>
 
           <a href="/forgot_password" class="forgot-pass">Forgot password?</a>
           <input type="submit" value="Login" class="btn solid" />
         </form>
+        <div id="success-message" class="popup">
+          <p>Successfully signed up!</p>
+        </div>
         <form method="post" action="/register" class="sign-up-form" id="signup-form">
           <h2 class="title">Sign up</h2>
           <div class="input-field">
@@ -40,16 +49,24 @@
             <input type="text" placeholder="Username" name="username-sign-up" id="username" />
 
           </div>
+          <p id="username-error-exist" style="color: red; display: none;font-size: 14px; ">Username is already exists.
+          </p>
+          <p id="username-error" style="color: red; display: none;font-size: 14px;">Invalid username</p>
           <div class="input-field">
             <i class="fas fa-envelope"></i>
             <input type="email" placeholder="Email" name="email" id="email-input" />
           </div>
+          <p id="email-error" style="color: red; display: none;font-size: 14px; ">Invalid email address.</p>
+          <p id="email-error-exist" style="color: red; display: none;font-size: 14px; ">Email address is already exists.
+          </p>
 
           <div class="input-field">
             <i class="fas fa-lock"></i>
             <input type="password" placeholder="Password" name="password-sign-up" id="password-inputSignup" />
             <button type="button" id="show-password-buttonSignup" class="show-password-button">Show Password</button>
           </div>
+          <p id="password-error" style="color: red; display: none;font-size: 14px;">Password must be at least 8
+            characters long.</p>
             <div class="checkbox-container">
               <input type="checkbox" id="checkbox" name="myCheckbox" required>
               <label for="checkbox">By signing up, you agree to the <a href="url-of-terms">Terms</a> and <a href="url-of-privacy-policy">Privacy Policy</a>.</label>
@@ -83,6 +100,7 @@
       </div>
     </div>
   </div>
+  <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
   <script src="../static/scripts/script.js"></script>
 </body>
 

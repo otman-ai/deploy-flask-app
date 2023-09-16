@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+ 
+
+
+        .flex-container {
+            justify-content: space-around;
+            display: flex;
+            align-items: center;
+            /* Vertically align items */
+        }
+
+
+        video,
+        img {
+            width: 100%;
+            /* Full width of container */
+            max-width: 400px;
+            /* Maximum width for larger screens */
+            height: auto;
+            /* Maintain aspect ratio */
+        }
+
+        /* Adjust the size of the video element */
+        .flex-container video,
+        img {
+            width: 100%;
+            /* Full width of container */
+            max-width: 700px;
+            /* Maximum width for larger screens */
+            height: auto;
+            /* Maintain aspect ratio */
+        }
+
+        /* Style for the play button */
+        .play-button {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000; /* Higher value than the z-index of the header */
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        #table-container {
+            max-height: 300px;
+            max-width: 100%; /* Adjust this to your preferred maximum height */
+            overflow-y: auto; /* Use auto instead of scroll */
+            display: flex; /* Use flex display to align items */
+            flex-direction: column; /* Stack items vertically */
+        }
+        #data-container {
+            overflow-y: auto; /* Allow body to scroll within the container */
+            flex: 1; /* Expand to fill remaining space */
+        }
+        th {
+            position: sticky;
+            background-color: #f2f2f2; /* Optional: Add a background color to header cells */
+            top: 0;
+            z-index: 1; /* Ensure headers are above body content */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome to the dashboard, {{ user.username }}!</h1>
+
+    <!-- Logout Form -->
+    <form action="logout">
+        <input type="submit" value="Logout">
+    </form>
+
+    <!-- Video Uploader for adding a new camera -->
+    <form method="post" enctype="multipart/form-data">
+        <input type="file" name="video">
+        <input type="submit" value="Upload Video">
+    </form>
+
+    <div class="flex-container">
+        <!-- Video Screen for new one -->
+        {% if video_path %}
+        <div>
+            <h2>The Stream Video:</h2>
+            <video controls autoplay>
+                <source src="{{ url_for('static', filename=video_path) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        {% endif %}
+
+        <!-- Video Screen for Detection results -->
+        {% if file_annotated %}
+        <div>
+            <h2>Detection Results:</h2>
+            <img src="{{ url_for('video_annotated', filename=file_annotated) }}" alt="Annotated Frame">
+        </div>
+
+        {% endif %}
+    </div>
+    </div>
+    <div id="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Object name</th>
+                    <th>Time</th>
+                    <th>id</th>
+                </tr>
+            </thead>
+            {% if csv_data_available %}
+            <tbody id="data-container">
+                <!-- New data will be inserted here -->
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+    <!-- Show the data in the database section -->
+    {% if cameras %}
+    <h2>Your Videos:</h2>
+    <div id="table-container">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Camera Size (MB)</th>
+                    <th>date</th>
+                    <th>Video width</th>
+                    <th>Video height</th>
+                    <th>Video Player</th>
+                    <th>Data</th>
+    
+    
+                </tr> 
+            </thead>
+
+            {% for camera in cameras %}
+            <tr>
+                <td>{{ camera.video_filename }}</td>
+                <td>{{ camera.video_size }}</td>
+                <td>{{ camera.video_date }}</td>
+                <td>{{ camera.video_width }}</td>
+                <td>{{ camera.video_height }}</td>
+    
+    
+                <td>
+                    {% if camera.video_filename %}
+                    <!-- Play button that opens the modal -->
+                    <button class="play-button"
+                        onclick="openModal('{{ url_for('video', filename=camera.video_filename) }}')">Play</button>
+                    {% else %}
+                    No video available.
+                    {% endif %}
+                </td>
+                {% if camera.tracked_data_name %}
+                <td><a href="{{ url_for('download_csv', filename=camera.tracked_data_name) }}">link</a></td>
+                {% endif %}           
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <p>No camera found for this user.</p>
+    {% endif %}
+
+    <!-- Modal for playing the video -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <video controls autoplay id="modalVideo">
+                <source src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+    </div>
+
+    <script>
+        // Function to open the modal and set the video source
+        function openModal(videoSrc) {
+            const modal = document.getElementById('videoModal');
+            const modalVideo = document.getElementById('modalVideo');
+            modalVideo.src = videoSrc;
+            modal.style.display = 'block';
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            const modal = document.getElementById('videoModal');
+            const modalVideo = document.getElementById('modalVideo');
+            modalVideo.pause();
+            modalVideo.currentTime = 0;
+            modal.style.display = 'none';
+        }
+
+        function updateData() {
+            $.get('/get_csv_data', function(data) {
+                $('#data-container').html(data);
+            });
+        }
+
+        $(document).ready(function() {
+            updateData();
+            setInterval(updateData, 5000);  // Update every 5 seconds
+        });
+    </script>
+</body>
+
+</html>

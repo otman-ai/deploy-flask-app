@@ -1,0 +1,66 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="dash-teamplate">
+    <p class="headline">Welcome back, {{ user[1] }}!</p>
+    <div class="live-stream">
+
+        <div class="live-stream-headlines">
+            <p>Live Streams: </p>
+            <input type="submit" value="+ Add Stream" class="btn solid" id="addStreamBtn" />
+        </div>
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="heading2-modal">Add New Video Stream</h2>
+                <p class="para-modal">Enter the IP address and port below to add a new video stream:</p>
+                <p class="error-confi"style="color: red; display: none;font-size: 14px; ">The information you enter is incorrect.</p>
+                <div class="camera-config">
+                    <input type="text" class="input-field"id="ipAddress" placeholder="IP Adress"value="" />
+                    <input type="text" class="input-field"id="port" placeholder="Port" value=""/>
+                   </div>
+                    <button id="submitStreamBtn">Submit</button>
+            </div>
+           
+        </div>
+    </div>
+    <div class="live-stream-content" >
+        {% if cameras %}
+        {% for camera in cameras %}
+        <div class="camera">
+                <img alt="Camera {{ camera.id}}" class="camera_img">
+                <button class="remove-button" alt="{{ camera.id}}">&#10006;</button>
+                <div class="status-container">
+                    <p id="{{ camera.id }}" class="status-camera"></p>
+                    <p class="camera_name">{{ camera.camera_name }}</p>
+                </div>
+               
+
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No camera found for this user.</p>
+        {% endif %}
+    </div>
+    <div class="live-stream-headlines">
+        <p>Live Detection: </p>
+    </div>
+    <div class="live-stream-content" >
+        {% if cameras %}
+        {% for camera in cameras %}
+        <div class="camera" >
+            <img src="{{ url_for('video_annotated', camera_id=camera.id) }}" alt="Annotated Frame" class="camera_img-detect">
+            <div class="status-container">
+                <p id="{{ camera.id }}-detection" class="status_detection"></p>
+                <p class="camera_name">{{ camera.camera_name }}</p>
+            </div>
+            
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No Detection found for this user.</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{% endblock %}
