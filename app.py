@@ -16,6 +16,7 @@ def forgot_password():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    msg = ""
     if request.method == 'POST':
         data = request.json
         print(data)
@@ -25,7 +26,7 @@ def register():
         print(username, password, email)
         check_query = f"select count(*) from users where username = '{username}' or email = '{email}'"
         query = f"insert into users(username, email, password_hash) values ('{username}', '{email}', '{password}')"
-        msg = ""
+        
         with engine.connect() as connection:
             result = connection.execute(text(check_query))
             if result.all()[0][0]>=1:
