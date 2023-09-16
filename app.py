@@ -1,23 +1,8 @@
 # Import libraries
 from flask import Flask, render_template, redirect, url_for,request
 from sqlalchemy import create_engine , text
-
+from database import engine
 app = Flask(__name__, template_folder="templates")
-host = "aws.connect.psdb.cloud"
-user = "ygg2zbfdcntdfxr152o6"
-password = "pscale_pw_JoAgDLiFNDTU8ZWL3wJcKTirWLbwDmLFjgngov9uNJW"
-database = "data-users"
-connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
-connect_args={
-        "ssl": {
-            "ssl_ca": "/etc/ssl/cert.pem"
-        }
-    }
-
-engine = create_engine(connection_db,connect_args=connect_args)
-
-with engine.connect() as connection:
-    result = connection.execute(text("select * from users"))
 
 @app.route("/")
 def home():
@@ -33,9 +18,11 @@ def forgot_password():
 def register():
     if request.method == 'POST':
         data = request.json
-        username = data.username
-        password = data.password
-        email = data.email
+        print(data)
+        username = data["username"]
+        password = data["password"]
+        email = data['email']
+        print(username, password, email)
         check_query = f"select count(*) from users where username = '{username}' or email = '{email}'"
         query = f"insert into users(username, email, password_hash) values ('{username}', '{email}', '{password}')"
         with engine.connect() as connection:

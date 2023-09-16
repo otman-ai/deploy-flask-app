@@ -1,42 +1,14 @@
-from dotenv import load_dotenv
+from sqlalchemy import create_engine , text
 
-# Load environment variables from the .env file
-load_dotenv()
-import os
-import MySQLdb
+host = "aws.connect.psdb.cloud"
+user = "0b6lfqrst79nbtyy4y3l"
+password = "pscale_pw_vc0Uq1jSdgv4UIJ9DSIND0g9iKBdPWL3xVp65NVek6A"
+database = "data-users"
+connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
+connect_args={
+        "ssl": {
+            "ssl_ca": "/etc/ssl/cert.pem"
+        }
+    }
 
-# Connect to the database
-connection = MySQLdb.connect(
-  host=os.getenv("DATABASE_HOST"),
-  user=os.getenv("DATABASE_USERNAME"),
-  passwd=os.getenv("DATABASE_PASSWORD"),
-  db=os.getenv("DATABASE"),
-  autocommit=True,
-  ssl_mode="VERIFY_IDENTITY",
-  # See https://planetscale.com/docs/concepts/secure-connections#ca-root-configuration
-  # to determine the path to your operating systems certificate file.
-  ssl={ "ca": "" }
-)
-
-try:
-    # Create a cursor to interact with the database
-    cursor = connection.cursor()
-
-    # Execute "SHOW TABLES" query
-    cursor.execute("SHOW TABLES")
-
-    # Fetch all the rows
-    tables = cursor.fetchall()
-
-    # Print out the tables
-    print("Tables in the database:")
-    for table in tables:
-        print(table[0])
-
-except MySQLdb.Error as e:
-    print("MySQL Error:", e)
-
-finally:
-    # Close the cursor and connection
-    cursor.close()
-    connection.close()
+engine = create_engine(connection_db,connect_args=connect_args)
