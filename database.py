@@ -53,9 +53,9 @@ def insert_to_db(username, password, email):
         return False
     
 def login_function(username):
-    QUERY = text(f"SELECT * FROM users WHERE username='{username}'")
+    QUERY = text(f"SELECT * FROM users WHERE username= :username")
     with engine.connect() as conn:
-        result = conn.execute(QUERY).all()
+        result = conn.execute(QUERY, username=username).all()
         return result
 print(login_function("wissal"))
 # check_if_exist("wissal","wissal@gmail.com")
