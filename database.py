@@ -11,10 +11,9 @@ from sqlalchemy import create_engine , text
 #         }
 #     }
 # engine = create_engine(connection_db,connect_args=connect_args)
-
-host = "aws.connect.psdb.cloud"
-user = "b4bqjoa5liek9o4gu85f"
-password = "pscale_pw_ft3lt1rdkRQX8m1plmljY0T6D31bWAv8uuWLT3Sjvut"
+host = "ap-southeast.connect.psdb.cloud"
+user = "uhcgmdpv7d9q88ibwl6i"
+password = "pscale_pw_YhYY49CxXm4scUbmDOljHIv4BhtmZnrPedTiPJtY09j"
 database = "data-users"
 connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
