@@ -11,11 +11,11 @@ from sqlalchemy import create_engine , text
 #         }
 #     }
 # engine = create_engine(connection_db,connect_args=connect_args)
-host = "aws.connect.psdb.cloud"
-user = "rctrzbvskblylzzn0pzn"
-password = "pscale_pw_9euRAC5GRrPixRUxD9LmrCzEhs70CLqFEpV3cyH3V53"
-database = "data-users"
-connection_db = f"mysql+pymysql://{user}:{password}@{host}/{database}?charset=utf8mb4"
+# host = "aws.connect.psdb.cloud"
+# user = "rki49pc0qkycwlcv1evn"
+# password = "pscale_pw_SfN0tvlA0flhVxZ3IQ9y04dQVkAImOPWv5MwBefcFEZ"
+# database = "data-users"
+connection_db = f"mysql+pymysql://zw57vxln0d7q5i45upvj:pscale_pw_JGXDa2zQR8Uor0TPzKCt8UnBxyQf7EkVx2OWVwfCuCu@aws.connect.psdb.cloud/data-users?charset=utf8mb4"
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
 engine = create_engine(connection_db, connect_args=connect_args)
 
