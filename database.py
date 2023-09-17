@@ -11,7 +11,7 @@ import os
 #             "ssl_ca": "/etc/ssl/cert.pem"
 #         }
 #     }
-connection_db = "mysql+pymysql://9ywrth98njylsobn3prl:pscale_pw_MRwxhQ0v87I0NUd1laJYk9RXUJIvrIaOnTYfI86mOZI@aws.connect.psdb.cloud/data-users?charset=utf8mb4"
+connection_db = os.environ['DB_CONNECTION_STRING']
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
 engine = create_engine(connection_db, connect_args=connect_args)
 
@@ -34,9 +34,9 @@ def load_data():
 def check_if_exist(username, email):
     email_exist = False
     username_exist = False
-    QUERY = f"SELECT * FROM users WHERE username='{username}' OR email='{email}'"
+    QUERY = f"SELECT * FROM users WHERE username= :username OR email= :email"
     with engine.connect() as conn:
-        result = conn.execute(text(QUERY)).all()
+        result = conn.execute(text(QUERY),parameters={"username":username, "email":email}).all()
         for i in result:
             if i[2] == email:
                 email_exist = True
@@ -57,7 +57,7 @@ def login_function(username):
     
     with engine.connect() as conn:
         parameters = dict(username=username)
-        result = conn.execute(QUERY, parameters=parameters)
+        result = conn.execute(QUERY, parameters=parameters).all()
         
     return result
 
