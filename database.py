@@ -11,7 +11,7 @@ import os
 #             "ssl_ca": "/etc/ssl/cert.pem"
 #         }
 #     }
-connection_db = os.getenv("DB_CONNECTION_STRING")
+connection_db = "mysql+pymysql://9ywrth98njylsobn3prl:pscale_pw_MRwxhQ0v87I0NUd1laJYk9RXUJIvrIaOnTYfI86mOZI@aws.connect.psdb.cloud/data-users?charset=utf8mb4"
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
 engine = create_engine(connection_db, connect_args=connect_args)
 
@@ -52,10 +52,14 @@ def insert_to_db(username, password, email):
             return True
         return False
     
-def login_function(username):
-    QUERY = text(f"SELECT * FROM users WHERE username= :username")
+def login_function(username):    
+    QUERY = text("SELECT * FROM users WHERE username = :username")
+    
     with engine.connect() as conn:
-        result = conn.execute(QUERY, username=username).all()
-        return result
+        parameters = dict(username=username)
+        result = conn.execute(QUERY, parameters=parameters)
+        
+    return result
+
 print(login_function("wissal"))
 # check_if_exist("wissal","wissal@gmail.com")
