@@ -12,6 +12,7 @@ import os
 #         }
 #     }
 connection_db = os.environ['DB_CONNECTION_STRING']
+
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
 engine = create_engine(connection_db, connect_args=connect_args)
 
