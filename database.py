@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine , text
+import os
 # host = "localhost"
 # user = "root"
 # password = "pscale_pw_vc0Uq1jSdgv4UIJ9DSIND0g9iKBdPWL3xVp65NVek6A"
@@ -10,12 +11,15 @@ from sqlalchemy import create_engine , text
 #             "ssl_ca": "/etc/ssl/cert.pem"
 #         }
 #     }
+# mysql+pymysql://rxaneh7691bkq1ejigyq:pscale_pw_VRrTzuSJq9bmbIHT8ypabOWLPs2C2pqpsoWlOmhY809@aws.connect.psdb.cloud/data-users?charset=utf8mb4
 # engine = create_engine(connection_db,connect_args=connect_args)
 # host = "aws.connect.psdb.cloud"
 # user = "rki49pc0qkycwlcv1evn"
 # password = "pscale_pw_SfN0tvlA0flhVxZ3IQ9y04dQVkAImOPWv5MwBefcFEZ"
 # database = "data-users"
-connection_db = f"mysql+pymysql://zw57vxln0d7q5i45upvj:pscale_pw_JGXDa2zQR8Uor0TPzKCt8UnBxyQf7EkVx2OWVwfCuCu@aws.connect.psdb.cloud/data-users?charset=utf8mb4"
+connection_db = os.environ['DB_CONNECTION_STRING']
+
+# connection_db = f"mysql+pymysql://{user}:{passwd}@{host}/{db}?charset=utf8mb4"
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
 engine = create_engine(connection_db, connect_args=connect_args)
 
