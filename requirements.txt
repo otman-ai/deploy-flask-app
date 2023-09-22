@@ -3,3 +3,4 @@ gunicorn
 sqlalchemy
 mysql-connector-python
 pymysql
+requests
