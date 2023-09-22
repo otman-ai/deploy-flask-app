@@ -3,10 +3,14 @@
 <div class="dash-teamplate">
     <p class="headline">Welcome back, {{ user.username }}!</p>
     <div class="live-stream">
-        <form action="/upload" method="POST" enctype="multipart/form-data">
+        <form action="/dash" method="POST" enctype="multipart/form-data">
             <input type="file" name="image" accept="image/*" required>
             <input type="submit" value="Upload">
         </form>
+        {% if img_detect %}
+        <h2>Detected Image:</h2>
+        <img src="data:image/jpeg;base64,{{ img_detect }}" alt="Detected Image">
+        {% endif %}
         <div class="live-stream-headlines">
             <p>Live Streams: </p>
             <input type="submit" value="+ Add Stream" class="btn solid" id="addStreamBtn" />

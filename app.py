@@ -6,6 +6,9 @@ import os
 from constant import *
 import datetime
 import requests
+import cv2
+import base64
+from io import BytesIO
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 @app.route('/check', methods=['POST'])
@@ -48,7 +51,23 @@ def check_ips():
 #         except:
 #             return 
 #     return render_template("access_denied.html")
+def generate_img(json_,img):
+    image = cv2.imread(img)
+    # Loop through each bounding box and draw it on the image
+    for key, box_info in json_.items():
+        x1, y1, x2, y2 = map(int, box_info["boxes"])
+        class_name = box_info["class name"]
+        color = (0, 255, 0)  # Green color in BGR
 
+        # Draw the bounding box rectangle
+        cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness=2)
+
+        # Add a label above the bounding box
+        cv2.putText(image, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+    # Save the modified image with bounding boxes
+    cv2.imwrite("output_image_with_boxes.jpg", image)
+    return 'output_image_with_boxes.jpg'
 @app.route("/")
 def home():
     return redirect(url_for('login'))
@@ -57,21 +76,6 @@ def home():
 def page_not_found(e):
     return render_template("404_page.html"), 404
 
-@app.route("/upload",methods=["POST"])
-def upload_():
-    if 'image' not in request.files:
-        return 'No iameg part'
-    image = request.files["image"]
-    path = "image.jpg"
-    image.save(path)
-    url = 'http://ec2-51-20-71-211.eu-north-1.compute.amazonaws.com/predict'
-    files = {"image":('image.jpg',open(path,'rb'))}
-    reponse = requests.post(url,files=files)
-    if reponse.status_code == 200:
-        print(reponse.json())
-        return reponse.json()
-    else :
-        return "Error while handling the request"
 @app.route("/forgot_password")
 def forgot_password():
     return render_template("forgot_password.html")
@@ -111,27 +115,41 @@ def login():
 @app.route('/dash', methods=["GET", "POST"])
 def dash():
     if 'username' in session:
+        img_data = None
         if request.method == 'POST':
-            data = request.get_json()
-            ipAddress = data.get('ipAddress')
-            port = data.get('port')
-            camera_ipAdress = f"http://{ipAddress}:{port}/video"               
-            current_datetime = datetime.datetime.now()                    
-            formatted_datetime = current_datetime.strftime("%Y-%b-%d:%H:%M:%S")[:-3]
-            camera_date = formatted_datetime
+            if 'image' in request.files:
+                image = request.files["image"]
+                path = "image.jpg"
+                image.save(path)
+                url = 'http://ec2-51-20-71-211.eu-north-1.compute.amazonaws.com/predict'
+                files = {"image":('image.jpg',open(path,'rb'))}
+                reponse = requests.post(url,files=files)
+                if reponse.status_code == 200:
+                    img = generate_img(reponse.json(),path)
+                    img_data = base64.b64encode(cv2.imencode('.jpg', cv2.imread(img))[1]).decode()
+            else:  
+                data = request.get_json()
+                ipAddress = data.get('ipAddress')
+                port = data.get('port')
+                camera_ipAdress = f"http://{ipAddress}:{port}/video"               
+                current_datetime = datetime.datetime.now()                    
+                formatted_datetime = current_datetime.strftime("%Y-%b-%d:%H:%M:%S")[:-3]
+                camera_date = formatted_datetime
 
-            user_id = get_user_id(session['username'])
-            camera_id = insert_to_camera(user_id, camera_ipAdress, camera_date)
-            if camera_id:
-                output_dir = UPLOAD_FOLDER+f"{user_id}/{camera_id}/"
-                camera_name = f"Camera  {camera_id}"
-                db_update = insert_to_camera_part(camera_name, output_dir)
-            else:
-                print("Error while inserting to db.")
+                user_id = get_user_id(session['username'])
+                camera_id = insert_to_camera(user_id, camera_ipAdress, camera_date)
+                if camera_id:
+                    output_dir = UPLOAD_FOLDER+f"{user_id}/{camera_id}/"
+                    camera_name = f"Camera  {camera_id}"
+                    db_update = insert_to_camera_part(camera_name, output_dir)
+                else:
+                    print("Error while inserting to db.")
+
         user = login_function(session["username"])[0]
-        data = load_data(session["username"]) 
-
-        return render_template("dashboard_templates/dash.html", user=user,cameras=data)
+        data = load_data(session["username"])
+        if img_data == None:
+            return render_template("dashboard_templates/dash.html", user=user,cameras=data)
+        return render_template("dashboard_templates/dash.html", user=user,cameras=data, img_detect=img_data)
     return redirect(url_for("login"))
 
 @app.route('/dash/cameras', methods=["GET", "POST"])
