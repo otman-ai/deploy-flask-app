@@ -1,11 +1,11 @@
 # Import libraries
-from flask import Flask, render_template, redirect, url_for,request,jsonify, session
-from sqlalchemy import create_engine , text
+from flask import Flask, render_template, redirect, url_for, request, jsonify, session, Response
 from database import *
 from werkzeug.security import generate_password_hash, check_password_hash
-
 import os 
-
+from constant import *
+import datetime
+import requests
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 @app.route('/check', methods=['POST'])
@@ -22,6 +22,33 @@ def check():
     return jsonify(result)
 
 
+@app.route('/check_ips', methods=['GET'])
+def check_ips():
+    ip_adresses = []
+    ids = []
+    if 'username' in session:
+        data = load_data(session["username"]) 
+        for camera in data:
+            camera_ip_address = camera['camera_ipAdress']
+            ids.append(str(camera['id']))
+            ip_adresses.append(camera_ip_address)
+    
+    return jsonify({"ip_adresses":ip_adresses,"ids":ids})
+
+
+# @app.route('/video_annotated/<int:camera_id>')
+# def video_annotated(camera_id):
+#     if 'username' in session:
+#         camera_ipAdress = load_data_condition(camera_id)
+#         print("camera_ipAdress: ",camera_ipAdress)
+#         re = None
+#         try:  
+#             re = generate_frames(camera_ipAdress,"","") 
+#             return Response(re, mimetype='multipart/x-mixed-replace; boundary=frame')
+#         except:
+#             return 
+#     return render_template("access_denied.html")
+
 @app.route("/")
 def home():
     return redirect(url_for('login'))
@@ -30,6 +57,21 @@ def home():
 def page_not_found(e):
     return render_template("404_page.html"), 404
 
+@app.route("/upload",methods=["POST"])
+def upload_():
+    if 'image' not in request.files:
+        return 'No iameg part'
+    image = request.files["image"]
+    path = "image.jpg"
+    image.save(path)
+    url = 'http://ec2-51-20-71-211.eu-north-1.compute.amazonaws.com/predict'
+    files = {"image":('image.jpg',open(path,'rb'))}
+    reponse = requests.post(url,files=files)
+    if reponse.status_code == 200:
+        print(reponse.json())
+        return reponse.json()
+    else :
+        return "Error while handling the request"
 @app.route("/forgot_password")
 def forgot_password():
     return render_template("forgot_password.html")
@@ -69,8 +111,27 @@ def login():
 @app.route('/dash', methods=["GET", "POST"])
 def dash():
     if 'username' in session:
+        if request.method == 'POST':
+            data = request.get_json()
+            ipAddress = data.get('ipAddress')
+            port = data.get('port')
+            camera_ipAdress = f"http://{ipAddress}:{port}/video"               
+            current_datetime = datetime.datetime.now()                    
+            formatted_datetime = current_datetime.strftime("%Y-%b-%d:%H:%M:%S")[:-3]
+            camera_date = formatted_datetime
+
+            user_id = get_user_id(session['username'])
+            camera_id = insert_to_camera(user_id, camera_ipAdress, camera_date)
+            if camera_id:
+                output_dir = UPLOAD_FOLDER+f"{user_id}/{camera_id}/"
+                camera_name = f"Camera  {camera_id}"
+                db_update = insert_to_camera_part(camera_name, output_dir)
+            else:
+                print("Error while inserting to db.")
         user = login_function(session["username"])[0]
-        return render_template("dashboard_templates/dash.html", user=user)
+        data = load_data(session["username"]) 
+
+        return render_template("dashboard_templates/dash.html", user=user,cameras=data)
     return redirect(url_for("login"))
 
 @app.route('/dash/cameras', methods=["GET", "POST"])
@@ -172,8 +233,11 @@ def logout():
 
 @app.route('/api')
 def api():
-    data = load_data() 
-    return jsonify(data)
+    if "username" in session:
+        data = load_data(session["username"]) 
+        print(data)
+        return jsonify(data)
+    return redirect(url_for("login"))
 
 if __name__ == '__main__':    
     app.run(host='0.0.0.0',debug=True)

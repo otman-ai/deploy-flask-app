@@ -1,9 +1,12 @@
 {% extends "dashboard.html" %}
 {% block content %}
 <div class="dash-teamplate">
-    <p class="headline">Welcome back, {{ user[1] }}!</p>
+    <p class="headline">Welcome back, {{ user.username }}!</p>
     <div class="live-stream">
-
+        <form action="/upload" method="POST" enctype="multipart/form-data">
+            <input type="file" name="image" accept="image/*" required>
+            <input type="submit" value="Upload">
+        </form>
         <div class="live-stream-headlines">
             <p>Live Streams: </p>
             <input type="submit" value="+ Add Stream" class="btn solid" id="addStreamBtn" />
@@ -44,22 +47,7 @@
     <div class="live-stream-headlines">
         <p>Live Detection: </p>
     </div>
-    <div class="live-stream-content" >
-        {% if cameras %}
-        {% for camera in cameras %}
-        <div class="camera" >
-            <img src="{{ url_for('video_annotated', camera_id=camera.id) }}" alt="Annotated Frame" class="camera_img-detect">
-            <div class="status-container">
-                <p id="{{ camera.id }}-detection" class="status_detection"></p>
-                <p class="camera_name">{{ camera.camera_name }}</p>
-            </div>
-            
-        </div>
-        {% endfor %}
-        {% else %}
-        <p>No Detection found for this user.</p>
-        {% endif %}
-    </div>
+
 </div>
 </div>
 
