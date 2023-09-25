@@ -1,7 +1,5 @@
 from sqlalchemy import create_engine , text
 import os
-import dotenv
-dotenv.load_dotenv()
 connection_db = os.environ['DB_CONNECTION_STRING']
 
 connect_args = {"ssl": {"ssl_ca": "/etc/ssl/cert.pem"}}
