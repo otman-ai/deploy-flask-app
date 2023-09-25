@@ -111,6 +111,7 @@ ENV/
 env.bak/
 venv.bak/
 F.py
+file.mp4
 jso.json
 # Spyder project settings
 .spyderproject
