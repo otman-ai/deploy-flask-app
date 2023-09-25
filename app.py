@@ -9,10 +9,7 @@ import requests
 
 import boto3
 import uuid
-import dotenv
 from werkzeug.datastructures import Headers
-
-dotenv.load_dotenv()
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
 video_keys = []
