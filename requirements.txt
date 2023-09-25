@@ -4,4 +4,4 @@ sqlalchemy
 mysql-connector-python
 pymysql
 requests
-opencv-python
+boto3
