@@ -5,16 +5,9 @@
 </head>
 <body>
     <h1>Upload and Display Video</h1>
-    <form action="/upload" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file">
-        <input type="submit" value="Upload">
-    </form>
-    {% if video_filename %}
-    <video controls autoplay>
-        <source src="{{ url_for('static', filename=video_filename) }}" type="video/mp4">
+    <video width="640" height="360" controls>
+        <source src='https://d2j0jiqttqesr8.cloudfront.net/b904b79d-aa25-48a5-b96e-76eceda046bd.mp4' type="video/mp4">
         Your browser does not support the video tag.
     </video>
-    {% endif %}
-    
 </body>
 </html>

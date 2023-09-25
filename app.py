@@ -1,5 +1,5 @@
 # Import libraries
-from flask import Flask, render_template, redirect, url_for, request, jsonify, session, Response
+from flask import Flask, stream_with_context,make_response,render_template, redirect, url_for, request, jsonify, session, Response
 from database import *
 from werkzeug.security import generate_password_hash, check_password_hash
 import os 
@@ -9,8 +9,27 @@ import requests
 import cv2
 import base64
 from io import BytesIO
+import boto3
+import uuid
+import tempfile
+import dotenv
+import re
+from werkzeug.datastructures import Headers
+import ffmpeg
+import subprocess
+
+dotenv.load_dotenv()
 app = Flask(__name__, template_folder="templates")
 app.secret_key = os.urandom(24)
+video_keys = []
+S3_BUCKET_NAME = 'usersuploadedvideos'
+s3 =  boto3.client(
+    service_name='s3',
+    region_name='eu-north-1',
+    aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+    aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY']
+)
+
 @app.route('/check', methods=['POST'])
 def check():
     data = request.json
@@ -38,39 +57,10 @@ def check_ips():
     
     return jsonify({"ip_adresses":ip_adresses,"ids":ids})
 
-
-# @app.route('/video_annotated/<int:camera_id>')
-# def video_annotated(camera_id):
-#     if 'username' in session:
-#         camera_ipAdress = load_data_condition(camera_id)
-#         print("camera_ipAdress: ",camera_ipAdress)
-#         re = None
-#         try:  
-#             re = generate_frames(camera_ipAdress,"","") 
-#             return Response(re, mimetype='multipart/x-mixed-replace; boundary=frame')
-#         except:
-#             return 
-#     return render_template("access_denied.html")
-def generate_img(json_,img):
-    image = cv2.imread(img)
-    # Loop through each bounding box and draw it on the image
-    for key, box_info in json_.items():
-        x1, y1, x2, y2 = map(int, box_info["boxes"])
-        class_name = box_info["class name"]
-        color = (0, 255, 0)  # Green color in BGR
-
-        # Draw the bounding box rectangle
-        cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness=2)
-
-        # Add a label above the bounding box
-        cv2.putText(image, class_name, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-    # Save the modified image with bounding boxes
-    cv2.imwrite("output_image_with_boxes.jpg", image)
-    return 'output_image_with_boxes.jpg'
 @app.route("/")
 def home():
     return redirect(url_for('login'))
+
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -111,22 +101,56 @@ def login():
         return render_template('login_page.html',message1="The username or password you entered is incorrect")
     return render_template('login_page.html')
 
+@app.route('/video/<path:key>')
+def serve_video(key):
+    # Replace 'https://example.com/video.mp4' with the actual video URL
+    remote_url = f'https://d2j0jiqttqesr8.cloudfront.net/{key}'
+    # Send a request to the remote URL and stream the video content
+    response = requests.get(remote_url, stream=True)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Set the content type and headers for the video
+        headers = {
+            'Content-Type': 'video/mp4',
+            'Content-Disposition': 'inline; filename="video.mp4"'
+        }
+
+        # Stream the video content to the Flask response
+        return Response(response.iter_content(chunk_size=1024), headers=headers, content_type='video/mp4')
 
 @app.route('/dash', methods=["GET", "POST"])
 def dash():
+    is_videoExist = False
     if 'username' in session:
         img_data = None
+        video_url = ''
         if request.method == 'POST':
-            if 'image' in request.files:
-                image = request.files["image"]
-                path = "image.jpg"
-                image.save(path)
-                url = 'http://ec2-51-20-71-211.eu-north-1.compute.amazonaws.com/predict'
-                files = {"image":('image.jpg',open(path,'rb'))}
-                reponse = requests.post(url,files=files)
-                if reponse.status_code == 200:
-                    img = generate_img(reponse.json(),path)
-                    img_data = base64.b64encode(cv2.imencode('.jpg', cv2.imread(img))[1]).decode()
+            if 'video' in request.files:
+                video = request.files["video"]
+
+
+                # Upload to Amazon S3 (requires proper AWS setup)
+                key = 'upload/'+ str(uuid.uuid4())+".mp4"
+                s3.upload_fileobj(video, S3_BUCKET_NAME, key)
+                # s3.upload_file(temp_video_file.name, S3_BUCKET_NAME, key)
+                # Send the POST request with JSON data to the external service
+                url = 'http://ec2-13-48-135-42.eu-north-1.compute.amazonaws.com/predict'
+                data_key = {'Key': key}
+                print("data_key",data_key)
+                user = login_function(session["username"])[0]
+                data = load_data(session["username"])
+                response = requests.post(url, json=data_key)
+                if 'Key' in response.json():
+                    video_key = response.json()['Key']
+                    video_keys.append(video_key)
+                    is_videoExist = True
+                    video_url = f'/video/{video_key}'
+                    print(response.json())
+                    return render_template("dashboard_templates/dash.html", 
+                                           user=user,cameras=data,video_url=video_url)
+                else:
+                    print(response.json())
             else:  
                 data = request.get_json()
                 ipAddress = data.get('ipAddress')
@@ -147,9 +171,7 @@ def dash():
 
         user = login_function(session["username"])[0]
         data = load_data(session["username"])
-        if img_data == None:
-            return render_template("dashboard_templates/dash.html", user=user,cameras=data)
-        return render_template("dashboard_templates/dash.html", user=user,cameras=data, img_detect=img_data)
+        return render_template("dashboard_templates/dash.html", user=user,cameras=data, is_video = is_videoExist)
     return redirect(url_for("login"))
 
 @app.route('/dash/cameras', methods=["GET", "POST"])
